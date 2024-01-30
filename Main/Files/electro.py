@@ -1,10 +1,10 @@
-import random, pygame, pygame.gfxdraw
+import random, pygame, pygame.gfxdraw, json
 
 # simulation variables
 dt = 0.1
 damping = 1
 width, height = (1500, 700)
-ballmax = 100
+ballmax = 2
 
 class Object():
     
@@ -74,7 +74,7 @@ def main():
 
     balllist = []
     for i in range(1,ballmax):
-        balllist.append(Object(i, (random.randint(0,254),0,0), random.randint(100,900), random.randint(10,400), random.randint(-100,100), 0, 10, random.randint(10,25)))
+        balllist.append(Object(i, (random.randint(0,255),random.randint(0,255),random.randint(0,255)), random.randint(100,900), random.randint(10,400), random.randint(-100,100), 0, 10, random.randint(10,25)))
 
     # main loop
     running = True
@@ -94,9 +94,11 @@ def main():
 
         screen.fill((255,255,255))
 
+
+        list1 = [(0,0,0),(255,0,0)]
         # update loop
         for i in range(1,ballmax - 1):
-            pygame.gfxdraw.filled_circle(screen, round(balllist[i].x), round(balllist[i].y), balllist[i].radius, (0,0,round(255*balllist[i].KE/15000)))
+            pygame.gfxdraw.filled_circle(screen, round(balllist[i].x), round(balllist[i].y), balllist[i].radius, list1[i])
             balllist[i].posupdate()
             balllist[i].velupdate()
         
