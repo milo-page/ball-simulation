@@ -1,7 +1,7 @@
 import random, pygame, pygame.gfxdraw, math
 
 # simulation variables
-dt = 0.025 # timestep
+dt = 0.1 # timestep
 damping = 1 # damping due to loss of energy, not working
 width, height = (1001, 701) # screen dimensions
 ballmax = 2 # amount of balls
@@ -23,6 +23,8 @@ class Object():
         self.KE = 0 # kinetic energy
         self.PE = 0 # potential energy
         self.collided = collided
+        self.momentum = 0
+        self.velTotal = 0
     
     # updating position
     def posupdate(self):
@@ -33,6 +35,8 @@ class Object():
 
         # updating potential energy (trying to keep proportional to kinetic energy)
         self.PE = 1/2 * (-1 * self.y + height - self.radius) ** 2
+        self.velTotal = (self.velx**2 + self.vely**2)**0.5
+        self.momentum = self.radius*self.velTotal
     
     # updating velocity
     def velupdate(self):
@@ -41,7 +45,10 @@ class Object():
         self.vely += self.acc * dt
 
         # kinetic energy update
-        self.KE = 1/2 * (self.velx**2 + self.vely**2)
+        self.KE = 1/2 * self.velTotal**2
+
+    # basic collision detection
+    def collision(self, number, balllist):
 
         # checking for floor to bounce
         if self.y >= height - self.radius:
@@ -58,9 +65,6 @@ class Object():
         else:
             pass
 
-    # basic collision detection
-    def collision(self, number, balllist):
-
         # iterate through the balls
         for k in range(0,ballmax):
 
@@ -68,6 +72,20 @@ class Object():
             if number == k:
                 pass
             
+            else:
+                if ((self.y - balllist[k].y)**2 + (self.x - balllist[k].x)**2)**0.5 <= self.radius + balllist[k].radius:
+                    totalmomentum = self.momentum + balllist[k].momentum
+                    self.velx = balllist[k].velx
+                    self.vely = balllist[k].vely
+
+                    #self.x +=
+                    # make the posotiin a slight amoutn away so it can not recollide
+                    # update velocties useing radius as mass
+                    # uopdate other balls vlecotiy
+
+
+
+            '''
             elif self.collided == False:
                 self.collided = True
                 # the x and y radius of ball and the rest
@@ -98,6 +116,7 @@ class Object():
                     pass
             else:
                 pass
+                '''
     # display information on the object for testing
     def display(self):
         print(f"""
@@ -127,7 +146,7 @@ def main():
 
     # instantiating balls in a range with random red colour
     for i in range(0,ballmax):
-        balllist[i] = (Object(i, posx[i], posy[i], vel[i], 0, 0, 50, (random.randint(0,255),0,0), False))
+        balllist[i] = (Object(i, posx[i], posy[i], vel[i], 0, 10, 50, (random.randint(0,255),0,0), False))
 
     # main loop
     running = True
@@ -144,7 +163,7 @@ def main():
                     running = False
 
         # main clock for the simulation
-        clock.tick(240)
+        clock.tick(120)
 
         # fill screen (deleting old instances of objects)
         screen.fill((255,255,255))
@@ -156,9 +175,10 @@ def main():
             pygame.gfxdraw.filled_circle(screen, round(balllist[i].x), round(balllist[i].y), balllist[i].radius, balllist[i].colour)
             
             # updating the different variables
+            balllist[i].collision(i, balllist)
             balllist[i].posupdate()
             balllist[i].velupdate()
-            balllist[i].collision(i, balllist)
+            
         
         pygame.display.update()
 
