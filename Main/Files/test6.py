@@ -1,7 +1,11 @@
-import random, pygame, pygame.gfxdraw, math
+# standard library imports
+import random, math
+
+# third-party imports
+import pygame, pygame.gfxdraw
 import numpy as np
 
-# simulation variables
+# simulation constants
 DT = 0.1 # timestep
 DAMPING = 1# damping due to loss of energy, not working
 WINDOW_WIDTH = 1001 # window width dimension
@@ -51,6 +55,29 @@ class Ball():
         self.KE = (0.5 * (self.total_velocity ** 2))
 
     def update_collision(self, number, ball_list):
+        
+        def ball_collision():
+                
+            for k in range(0,BALL_AMOUNT):
+
+                # not checking itself
+                if number == k:
+                    pass
+                
+                else:
+                    if ((self.y - BALL_LIST[k].y)**2 + (self.x - BALL_LIST[k].x)**2)**0.5 <= self.radius + BALL_LIST[k].radius:
+                        
+                        delta_x = self.x - ball_list[k].x
+                        delta_y = self.y - ball_list[k].y
+
+                        collision_vector = np.array([delta_x,delta_y])
+
+                        unit_vector = 1/((delta_x**2+delta_y**2)**0.5)*collision_vector
+
+                        self.velx = unit_vector[0]*ball_list[k].total_velocity*DAMPING
+                        self.vely = unit_vector[1]*ball_list[k].total_velocity*DAMPING
+                        ball_list[k].vely = -1*unit_vector[1]*self.total_velocity*DAMPING
+                        ball_list[k].vely = -1*unit_vector[1]*self.total_velocity*DAMPING
 
         # checking for floor to bounce
         if self.y >= WINDOW_HEIGHT - self.radius or self.y <= self.radius:
@@ -62,103 +89,13 @@ class Ball():
             
             self.velx = -1 * self.velx * DAMPING # velocity becomes opposite
         
-        for k in range(0,BALL_AMOUNT):
-
-            # not checking itself
-            if number == k:
-                pass
-            
-            else:
-                if ((self.y - BALL_LIST[k].y)**2 + (self.x - BALL_LIST[k].x)**2)**0.5 <= self.radius + BALL_LIST[k].radius:
-                    
-                    delta_x = self.x - ball_list[k].x
-                    delta_y = self.y - ball_list[k].y
-
-                    collision_vector = np.array([delta_x,delta_y])
-
-                    unit_vector = 1/((delta_x**2+delta_y**2)**0.5)*collision_vector
-
-                    self.velx = unit_vector[0]*ball_list[k].total_velocity*DAMPING
-                    self.vely = unit_vector[1]*ball_list[k].total_velocity*DAMPING
-                    ball_list[k].vely = -1*unit_vector[1]*self.total_velocity*DAMPING
-                    ball_list[k].vely = -1*unit_vector[1]*self.total_velocity*DAMPING
-
-                    #self.x +=
-                    # make the posotiin a slight amoutn away so it can not recollide
-                    # update velocties useing radius as mass
-                    # uopdate other balls vlecotiy
-
-        else:
-            pass
-      
-
-    '''# basic collision detection
-    def collision(self, number, BALL_LIST):
-
-        # checking for floor to bounce
-        if self.y >= height - self.radius:
-
-            self.vely = self.vely * -1 * damping # velocity becomes opposite
-
-        # checking for sides to bounce
-        elif self.x <= 0 + self.radius:
-            self.velx = self.velx * -1 * damping
-
-        elif self.x >= width - self.radius:
-            self.velx = self.velx * -1 * damping
-
         else:
             pass
 
-        # iterate through the balls
-        for k in range(0,ballmax):
 
-            # not checking itself
-            if number == k:
-                pass
-            
-            else:
-                if ((self.y - BALL_LIST[k].y)**2 + (self.x - BALL_LIST[k].x)**2)**0.5 <= self.radius + BALL_LIST[k].radius:
-                    totalmomentum = self.momentum + BALL_LIST[k].momentum
-                    self.velx = BALL_LIST[k].velx
-                    self.vely = BALL_LIST[k].vely
+        #ball_collision()
 
-                    #self.x +=
-                    # make the posotiin a slight amoutn away so it can not recollide
-                    # update velocties useing radius as mass
-                    # uopdate other balls vlecotiy
-          
-            elif self.collided == False:
-                self.collided = True
-                # the x and y radius of ball and the rest
-                [xd, yd] = self.x - BALL_LIST[k].x, self.y - BALL_LIST[k].y
-
-                # checking if any balls are withing the radius
-                if ((xd)**2 + (yd)**2)**0.5 <= 2*self.radius:
-                    
-                    # finding angle between balls
-                    if abs(xd) != 0:
-                        theta = math.atan(abs(yd) / abs(xd))
-                    else:
-                        theta = math.atan(abs(yd) / (abs(xd) + 0.001))
-                    
-                    velmag = (self.velx**2 + self.vely**2)**0.5
-                    print(velmag)
-
-
-                    # checking angle
-                    print(f" theta: {round(180/math.pi*theta,3)}")
-
-                    # velocities should be opposite each other
-                    self.velx = -(velmag*math.cos(theta))
-                    self.vely = -(velmag*math.sin(theta))
-                    BALL_LIST[k].velx = -(velmag*math.cos(theta))
-                    BALL_LIST[k].vely = -(velmag*math.sin(theta))
-                else:
-                    pass
-            else:
-                pass
-                '''
+        
     # display information on the object for testing
     def display(self):
         print(f"""
@@ -188,7 +125,7 @@ def main():
     # instantiating balls in a range with random red colour
     for i in range(0,BALL_AMOUNT):
         #BALL_LIST[i] = (Ball(i, posx[i], posy[i], vel[i], 0, 0, 10, 50, (random.randint(0,255),0,0)))
-        BALL_LIST[i] = (Ball(i,  random.randint(100,500),  random.randint(100,500), random.randint(5,20), 0, 0, 10, 25, (random.randint(0,255),0,0)))
+        BALL_LIST[i] = (Ball(i,  random.randint(100,500),  random.randint(100,500), random.randint(-20,20), random.randint(-20,20), 0, 0, 10, (random.randint(0,255),0,0)))
 
     # main loop
     running = True
