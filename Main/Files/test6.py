@@ -2,7 +2,8 @@
 import random, math
 
 # third-party imports
-import pygame, pygame.gfxdraw
+import pygame
+import pygame.gfxdraw
 import numpy as np
 
 # simulation constants
@@ -12,6 +13,17 @@ WINDOW_WIDTH = 1001 # window width dimension
 WINDOW_HEIGHT = 701 # window height dimension
 BALL_AMOUNT = 10 # amount of balls
 BALL_LIST = BALL_AMOUNT*[0] # empty list to contain ball objects
+
+
+def length(*args):
+
+    sum_1 = 0
+
+    for i in args:
+        sum_1 += i**2
+    
+    return (sum_1**0.5)
+
 
 # class for balls in sim
 class Ball():
@@ -41,7 +53,7 @@ class Ball():
 
         # updating potential energy (trying to keep proportional to kinetic energy)
         self.PE = (0.5 * ((-1 * self.y + WINDOW_HEIGHT - self.radius) ** 2))
-        self.total_velocity = (self.velx**2 + self.vely**2)**0.5
+        self.total_velocity = length(self.velx,self.vely)#(self.velx**2 + self.vely**2)**0.5
         self.momentum = self.radius*self.total_velocity
     
     # updating velocity
@@ -65,14 +77,14 @@ class Ball():
                     pass
                 
                 else:
-                    if ((self.y - BALL_LIST[k].y)**2 + (self.x - BALL_LIST[k].x)**2)**0.5 <= self.radius + BALL_LIST[k].radius:
+                    if (length((self.y - BALL_LIST[k].y),(self.x - BALL_LIST[k].x))) <= self.radius + BALL_LIST[k].radius:
                         
                         delta_x = self.x - ball_list[k].x
                         delta_y = self.y - ball_list[k].y
 
                         collision_vector = np.array([delta_x,delta_y])
 
-                        unit_vector = 1/((delta_x**2+delta_y**2)**0.5)*collision_vector
+                        unit_vector = 1/(length(delta_x,delta_y))*collision_vector
 
                         self.velx = unit_vector[0]*ball_list[k].total_velocity*DAMPING
                         self.vely = unit_vector[1]*ball_list[k].total_velocity*DAMPING
@@ -93,7 +105,7 @@ class Ball():
             pass
 
 
-        #ball_collision()
+        ball_collision()
 
         
     # display information on the object for testing
