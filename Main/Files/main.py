@@ -11,7 +11,7 @@ DT = 0.1 # timestep
 DAMPING = 1# damping due to loss of energy, not working
 WINDOW_WIDTH = 1001 # window width dimension
 WINDOW_HEIGHT = 701 # window height dimension
-BALL_AMOUNT = 10 # amount of balls
+BALL_AMOUNT = 2 # amount of balls
 BALL_LIST = BALL_AMOUNT*[0] # empty list to contain ball objects
 
 
@@ -28,7 +28,15 @@ def length(*args: list[int]):
 # class for balls in sim
 class Ball():
     
-    def __init__(self, number, x, y, velocityx, velocityy, accelerationx, accelerationy, radius, colour):
+    def __init__(self,
+                 number: int,
+                 x: int, y: int,
+                 velocityx: int,
+                 velocityy: int,
+                 accelerationx: int,
+                 accelerationy: int,
+                 radius: int,
+                 colour: tuple[int, int, int]):
 
         self.x = x # x position
         self.y = y # y position
@@ -124,14 +132,14 @@ def main():
 
 
     # testing variables
-    vel = [40,-40]
-    posx = [100,901]
-    posy = [400 - 25,400 + 25]
+    vel = [0,0]
+    posx = [405, 400]
+    posy = [400 - 100,400 + 100]
 
     # instantiating balls in a range with random red colour
     for i in range(0,BALL_AMOUNT):
-        #BALL_LIST[i] = (Ball(i, posx[i], posy[i], vel[i], 0, 0, 10, 50, (random.randint(0,255),0,0)))
-        BALL_LIST[i] = (Ball(i,  random.randint(100,500),  random.randint(100,500), random.randint(-20,20), random.randint(-20,20), 0, 0, 10, (random.randint(0,255),0,0)))
+        BALL_LIST[i] = (Ball(i, posx[i], posy[i], vel[i], 0, 0, 3, 20, (random.randint(0,255),0,0)))
+        #BALL_LIST[i] = (Ball(i,  random.randint(100,500),  random.randint(100,500), random.randint(-20,20), random.randint(-20,20), 0, 0, 10, (random.randint(0,255),0,0)))
 
     # main loop
     running = True
