@@ -15,14 +15,14 @@ BALL_AMOUNT = 10 # amount of balls
 BALL_LIST = BALL_AMOUNT*[0] # empty list to contain ball objects
 
 
-def length(*args):
+def length(*args: list[int]):
 
-    sum_1 = 0
+    x = 0
 
     for i in args:
-        sum_1 += i**2
+        x += i**2
     
-    return (sum_1**0.5)
+    return (x**0.5)
 
 
 # class for balls in sim
@@ -39,9 +39,7 @@ class Ball():
         self.colour = colour # colour of ball
         self.radius = radius # radius of ball
         self.num = number # number identifier
-        self.KE = 0 # kinetic energy
-        self.PE = 0 # potential energy
-        self.momentum = 0 # initializaing momentum
+        self.momentum = 0 # initializing momentum
         self.total_velocity = 0 # initializing the total velocity
     
     # updating position
@@ -51,9 +49,8 @@ class Ball():
         self.x += self.velx * DT
         self.y += self.vely * DT
 
-        # updating potential energy (trying to keep proportional to kinetic energy)
-        self.PE = (0.5 * ((-1 * self.y + WINDOW_HEIGHT - self.radius) ** 2))
-        self.total_velocity = length(self.velx,self.vely)#(self.velx**2 + self.vely**2)**0.5
+        # magnitude of velocity vector and momentum
+        self.total_velocity = length(self.velx,self.vely)
         self.momentum = self.radius*self.total_velocity
     
     # updating velocity
@@ -62,9 +59,6 @@ class Ball():
         # updating the velocity based on the acceleration
         self.velx += self.accx * DT
         self.vely += self.accy * DT
-
-        # kinetic energy update
-        self.KE = (0.5 * (self.total_velocity ** 2))
 
     def update_collision(self, number, ball_list):
         
@@ -76,8 +70,10 @@ class Ball():
                 if number == k:
                     pass
                 
+                # checking when ball is inside anothers radius
+                # TODO optimize
                 else:
-                    if (length((self.y - BALL_LIST[k].y),(self.x - BALL_LIST[k].x))) <= self.radius + BALL_LIST[k].radius:
+                    if (length((self.y - BALL_LIST[k].y), (self.x - BALL_LIST[k].x))) <= self.radius + BALL_LIST[k].radius:
                         
                         delta_x = self.x - ball_list[k].x
                         delta_y = self.y - ball_list[k].y
@@ -116,9 +112,7 @@ class Ball():
             x velocity: {round(self.velx, 2)}
             y velocity: {round(self.vely, 2)}
             acceleration: {self.acc}
-            Kinetic Energy: {round(self.KE, 3)}
-            Potential Energy: {round(self.PE, 2)}
-                """)
+            """)
 
 def main():
 
