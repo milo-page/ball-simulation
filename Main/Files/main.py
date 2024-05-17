@@ -62,7 +62,6 @@ class Ball():
                     delta_position = np.add(self.position, -ball_list[k].position)
 
                     if (magnitude(delta_position)) <= self.radius + ball_list[k].radius:
-                        delta_position = np.add(self.position, -ball_list[k].position)
 
                         unit_vector = 1/(magnitude(delta_position)) * delta_position
 
