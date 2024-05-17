@@ -11,54 +11,40 @@ DT = 0.1 # timestep
 DAMPING = 1# damping due to loss of energy, not working
 WINDOW_WIDTH = 1001 # window width dimension
 WINDOW_HEIGHT = 701 # window height dimension
-BALL_AMOUNT = 10 # amount of balls
+BALL_AMOUNT = 5 # amount of balls
 BALL_LIST = BALL_AMOUNT*[0] # empty list to contain ball objects
 
+def magnitude(x: np.array):
 
-def length(*args: list[int]):
-
-    x = 0
-
-    for i in args:
-        x += i**2
-    
-    return (x**0.5)
+    return np.sqrt(np.dot(x, x))
 
 
 # class for balls in sim
 class Ball():
     
-    def __init__(self, number, x, y, velocityx, velocityy, accelerationx, accelerationy, radius, colour):
+    def __init__(self, number, position, velocity, acceleration, radius, colour):
 
-        self.x = x # x position
-        self.y = y # y position
-        self.velx = velocityx # x velocity
-        self.vely = velocityy # y velocity
-        self.accx = accelerationx # y acceleration
-        self.accy = accelerationy # y acceleration
+        self.position = position
+        self.velocity = velocity
+        self.acceleration = acceleration # acceleration
         self.colour = colour # colour of ball
         self.radius = radius # radius of ball
         self.num = number # number identifier
-        self.momentum = 0 # initializing momentum
-        self.total_velocity = 0 # initializing the total velocity
     
     # updating position
     def update_position(self):
 
         # updating position based on velocity
-        self.x += self.velx * DT
-        self.y += self.vely * DT
+        self.position = np.add(self.position, self.velocity * DT)
 
-        # magnitude of velocity vector and momentum
-        self.total_velocity = length(self.velx,self.vely)
-        self.momentum = self.radius*self.total_velocity
+        # momentum
+        self.momentum = self.radius * magnitude(self.velocity)
     
     # updating velocity
     def update_velocity(self):
 
         # updating the velocity based on the acceleration
-        self.velx += self.accx * DT
-        self.vely += self.accy * DT
+        self.velocity = np.add(self.velocity, self.acceleration * DT)
 
     def update_collision(self, number, ball_list):
         
@@ -73,16 +59,12 @@ class Ball():
                 # checking when ball is inside anothers radius
                 # TODO optimize
                 else:
-                    if (length((self.y - BALL_LIST[k].y), (self.x - BALL_LIST[k].x))) <= self.radius + BALL_LIST[k].radius:
-                        
-                        delta_x = self.x - ball_list[k].x
-                        delta_y = self.y - ball_list[k].y
+                    if (magnitude(np.add(self.position, -ball_list[k].position))) <= self.radius + ball_list[k].radius
+                        delta_position = np.add(self.position, -ball_list[k].position)
 
-                        collision_vector = np.array([delta_x,delta_y])
+                        unit_vector = 1/(magnitude(delta_position)) * delta_position
 
-                        unit_vector = 1/(length(delta_x,delta_y))*collision_vector
-
-                        self.velx = unit_vector[0]*ball_list[k].total_velocity*DAMPING
+                        self.velocity = unit_vector*magnitude(ball_list[k].velocity)*DAMPING
                         self.vely = unit_vector[1]*ball_list[k].total_velocity*DAMPING
                         ball_list[k].vely = -1*unit_vector[1]*self.total_velocity*DAMPING
                         ball_list[k].vely = -1*unit_vector[1]*self.total_velocity*DAMPING
@@ -122,16 +104,9 @@ def main():
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption('kinematic simulation')
 
-
-    # testing variables
-    vel = [40,-40]
-    posx = [100,901]
-    posy = [400 - 25,400 + 25]
-
     # instantiating balls in a range with random red colour
     for i in range(0,BALL_AMOUNT):
-        #BALL_LIST[i] = (Ball(i, posx[i], posy[i], vel[i], 0, 0, 10, 50, (random.randint(0,255),0,0)))
-        BALL_LIST[i] = (Ball(i,  random.randint(100,500),  random.randint(100,500), random.randint(-20,20), random.randint(-20,20), 0, 0, 10, (random.randint(0,255),0,0)))
+        BALL_LIST[i] = (Ball(i,  np.array(random.randint(100,500)), np.array(random.randint(-11,11)), np.array((0,5)), 25, (random.randint(0,255),0,0)))
 
     # main loop
     running = True
