@@ -11,7 +11,7 @@ DT = 0.1 # timestep
 DAMPING = 1# damping due to loss of energy, not working
 WINDOW_WIDTH = 1001 # window width dimension
 WINDOW_HEIGHT = 701 # window height dimension
-BALL_AMOUNT = 2 # amount of balls
+BALL_AMOUNT = 5 # amount of balls
 BALL_LIST = BALL_AMOUNT*[0] # empty list to contain ball objects
 
 
@@ -138,8 +138,8 @@ def main():
 
     # instantiating balls in a range with random red colour
     for i in range(0,BALL_AMOUNT):
-        BALL_LIST[i] = (Ball(i, posx[i], posy[i], vel[i], 0, 0, 3, 20, (random.randint(0,255),0,0)))
-        #BALL_LIST[i] = (Ball(i,  random.randint(100,500),  random.randint(100,500), random.randint(-20,20), random.randint(-20,20), 0, 0, 10, (random.randint(0,255),0,0)))
+        #BALL_LIST[i] = (Ball(i, posx[i], posy[i], vel[i], 0, 0, 5, 40, (random.randint(0,255),0,0)))
+        BALL_LIST[i] = (Ball(i,  random.randint(100,500),  random.randint(100,500), random.randint(-20,20), random.randint(-20,20), 0, 5, 20, (random.randint(0,255),0,0)))
 
     # main loop
     running = True
@@ -161,11 +161,14 @@ def main():
         # fill screen (deleting old instances of objects)
         screen.fill((255,255,255))
 
+        a = 50
+
         # update loop
         for i in range(0,BALL_AMOUNT):
             
             # drawing circles
             pygame.gfxdraw.filled_circle(screen, round(BALL_LIST[i].x), round(BALL_LIST[i].y), BALL_LIST[i].radius, BALL_LIST[i].colour)
+            pygame.draw.line(screen, (0, 0, 0), (round(BALL_LIST[i].x), round(BALL_LIST[i].y)), (BALL_LIST[i].x + a*math.tanh(BALL_LIST[i].velx/a), BALL_LIST[i].y + a*math.tanh(BALL_LIST[i].vely/a)), 3)
             
             # updating the different variables
             BALL_LIST[i].update_collision(BALL_LIST[i].num, BALL_LIST)
