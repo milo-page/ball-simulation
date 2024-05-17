@@ -8,64 +8,84 @@ import numpy as np
 
 # simulation constants
 DT = 0.1 # timestep
-DAMPING = 1 # damping due to loss of energy, not working
+DAMPING = 1# damping due to loss of energy, not working
 WINDOW_WIDTH = 1001 # window width dimension
 WINDOW_HEIGHT = 701 # window height dimension
-BALL_AMOUNT = 5 # amount of balls
+BALL_AMOUNT = 2 # amount of balls
 BALL_LIST = BALL_AMOUNT*[0] # empty list to contain ball objects
 
-def magnitude(x: np.array):
 
-    return np.sqrt(np.dot(x, x))
+def length(*args):
 
+    sum_1 = 0
 
-# class for balls in simulation
+    for i in args:
+        sum_1 += i**2
+    
+    return (sum_1**0.5)
+
+# class for balls in sim
 class Ball():
     
-    def __init__(self, number, position, velocity, acceleration, radius, colour):
+    def __init__(self, number, x, y, velocityx, velocityy, accelerationx, accelerationy, radius, colour):
 
-        self.position = position
-        self.velocity = velocity
-        self.acceleration = acceleration # acceleration
+        self.x = x # x position
+        self.y = y # y position
+        self.velx = velocityx # x velocity
+        self.vely = velocityy # y velocity
+        self.accx = accelerationx # y acceleration
+        self.accy = accelerationy # y acceleration
         self.colour = colour # colour of ball
         self.radius = radius # radius of ball
         self.num = number # number identifier
+        self.KE = 0 # kinetic energy
+        self.PE = 0 # potential energy
+        self.momentum = 0 # initializaing momentum
+        self.total_velocity = 0 # initializing the total velocity
     
     # updating position
     def update_position(self):
 
         # updating position based on velocity
-        self.position = np.add(self.position, self.velocity * DT)
+        self.x += self.velx * DT
+        self.y += self.vely * DT
 
-        # momentum (using radius as mass)
-        self.momentum = self.radius * magnitude(self.velocity)
+        # updating potential energy (trying to keep proportional to kinetic energy)
+        self.PE = (0.5 * ((-1 * self.y + WINDOW_HEIGHT - self.radius) ** 2))
+        self.total_velocity = length(self.velx,self.vely)#(self.velx**2 + self.vely**2)**0.5
+        self.momentum = self.radius*self.total_velocity
     
     # updating velocity
     def update_velocity(self):
 
         # updating the velocity based on the acceleration
-        self.velocity = np.add(self.velocity, self.acceleration * DT)
+        self.velx += self.accx * DT
+        self.vely += self.accy * DT
 
-    def update_collision(self, ball_list):
+        # kinetic energy update
+        self.KE = (0.5 * (self.total_velocity ** 2))
+
+    def update_collision(self, number, ball_list):
         
         def ball_collision():
                 
-            for k in range(0, BALL_AMOUNT):
+            for k in range(0,BALL_AMOUNT):
 
                 # not checking itself
-                if self.number == k:
+                if number == k:
                     pass
                 
-                # checking when ball is inside anothers radius
-                # TODO optimize
                 else:
-                    delta_position = np.add(self.position, -ball_list[k].position)
+                    if (length((self.y - BALL_LIST[k].y),(self.x - BALL_LIST[k].x))) <= self.radius + BALL_LIST[k].radius:
+                        
+                        delta_x = self.x - ball_list[k].x
+                        delta_y = self.y - ball_list[k].y
 
-                    if (magnitude(delta_position)) <= self.radius + ball_list[k].radius:
+                        collision_vector = np.array([delta_x,delta_y])
 
-                        unit_vector = 1/(magnitude(delta_position)) * delta_position
+                        unit_vector = 1/(length(delta_x,delta_y))*collision_vector
 
-                        self.velocity = unit_vector*magnitude(ball_list[k].velocity)*DAMPING
+                        self.velx = unit_vector[0]*ball_list[k].total_velocity*DAMPING
                         self.vely = unit_vector[1]*ball_list[k].total_velocity*DAMPING
                         ball_list[k].vely = -1*unit_vector[1]*self.total_velocity*DAMPING
                         ball_list[k].vely = -1*unit_vector[1]*self.total_velocity*DAMPING
@@ -86,6 +106,16 @@ class Ball():
 
         ball_collision()
 
+    
+    def find_closest(self, ball_list, click):
+
+        for i in ball_list:
+            if ((self.x - click[0])**2 + (self.y - click[1])**2)**0.5 <= self.radius:
+                return self.number
+            else:
+                return "bruh"
+
+
         
     # display information on the object for testing
     def display(self):
@@ -95,7 +125,9 @@ class Ball():
             x velocity: {round(self.velx, 2)}
             y velocity: {round(self.vely, 2)}
             acceleration: {self.acc}
-            """)
+            Kinetic Energy: {round(self.KE, 3)}
+            Potential Energy: {round(self.PE, 2)}
+                """)
 
 def main():
 
@@ -105,10 +137,20 @@ def main():
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption('kinematic simulation')
 
+
+    # testing variables
+    velx = [0,0]
+    vely = [0,0]
+    posx = [400 - 200, 400 + 200]
+    posy = [400,400]
+    accx = [0, 0]
+    accy = [0, 0]
+
     # instantiating balls in a range with random red colour
     for i in range(0,BALL_AMOUNT):
-        BALL_LIST[i] = (Ball(i,  np.array(random.randint(100,500)), np.array(random.randint(-11,11)), np.array((0,5)), 25, (random.randint(0,255),0,0)))
-
+        BALL_LIST[i] = (Ball(i, posx[i], posy[i], velx[i], vely[i], accx[i], accy[i], 50, (random.randint(0,255),0,0)))
+    
+    
     # main loop
     running = True
     while running:
@@ -122,7 +164,18 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
-
+            
+            elif event.type == pygame.MOUSEBUTTONUP:
+                click = pygame.mouse.get_pos()
+                move = BALL_LIST[0].find_closest(BALL_LIST, click)
+                if move != "bruh":
+                    BALL_LIST[move].x = click[0]
+                    BALL_LIST[move].y = click[1]
+                else:
+                    print("hello")
+                    pass
+                    
+                           
         # main clock for the simulation
         clock.tick(120)
 
