@@ -8,7 +8,7 @@ import numpy as np
 
 # simulation constants
 DT = 0.1 # timestep
-DAMPING = 1# damping due to loss of energy, not working
+DAMPING = 1 # damping due to loss of energy, not working
 WINDOW_WIDTH = 1001 # window width dimension
 WINDOW_HEIGHT = 701 # window height dimension
 BALL_AMOUNT = 5 # amount of balls
@@ -19,7 +19,7 @@ def magnitude(x: np.array):
     return np.sqrt(np.dot(x, x))
 
 
-# class for balls in sim
+# class for balls in simulation
 class Ball():
     
     def __init__(self, number, position, velocity, acceleration, radius, colour):
@@ -37,7 +37,7 @@ class Ball():
         # updating position based on velocity
         self.position = np.add(self.position, self.velocity * DT)
 
-        # momentum
+        # momentum (using radius as mass)
         self.momentum = self.radius * magnitude(self.velocity)
     
     # updating velocity
@@ -46,20 +46,22 @@ class Ball():
         # updating the velocity based on the acceleration
         self.velocity = np.add(self.velocity, self.acceleration * DT)
 
-    def update_collision(self, number, ball_list):
+    def update_collision(self, ball_list):
         
         def ball_collision():
                 
-            for k in range(0,BALL_AMOUNT):
+            for k in range(0, BALL_AMOUNT):
 
                 # not checking itself
-                if number == k:
+                if self.number == k:
                     pass
                 
                 # checking when ball is inside anothers radius
                 # TODO optimize
                 else:
-                    if (magnitude(np.add(self.position, -ball_list[k].position))) <= self.radius + ball_list[k].radius
+                    delta_position = np.add(self.position, -ball_list[k].position)
+
+                    if (magnitude(delta_position)) <= self.radius + ball_list[k].radius:
                         delta_position = np.add(self.position, -ball_list[k].position)
 
                         unit_vector = 1/(magnitude(delta_position)) * delta_position
