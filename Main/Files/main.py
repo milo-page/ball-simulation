@@ -1,5 +1,5 @@
 # standard library imports
-import random, math
+import random, time
 
 # third-party imports
 import pygame
@@ -62,39 +62,47 @@ class Ball():
             for k in range(0,BALL_AMOUNT):
 
                 # not checking itself
-                # TODO make it only check balls that havent been checked (n^2 -> n!)
+                
                 if number == k:
                     pass
                 
                 # checking when ball is inside anothers radius
                 else:
+                    
+                    # TODO make it only check balls that havent been checked (n^2 -> n!)
+                    # would have to redo because now it uses this fact to calculate for both
                     delta_position = np.add(self.position, - ball_list[k].position)
-                    delta_radius = self.radius + ball_list[k].radius
+                    min_radius = self.radius + ball_list[k].radius
 
-                    if magnitude(delta_position) <= delta_radius:
+                    if magnitude(delta_position) <= min_radius:
                         
                         a = self.mass
                         b = ball_list[k].mass
                         def f(x, y): return (x - y)/(x + y)
                         def g(x, y): return (2 * y)/(x + y)
-
                         
-                        overlap = (delta_radius - magnitude(delta_position)) / 2
 
-                        # collison precion
-                        delta_position2 = np.add(ball_list[k].position, - self.position)
-                        collision_a = overlap * (delta_position2 * 1/magnitude(delta_position2))
-                        collision_b = overlap * (delta_position * 1/magnitude(delta_position))
-                        self.position = np.add(self.position, collision_a)
-                        ball_list[k].position = np.add(ball_list[k].position, collision_b)
-                        print(collision_a, collision_b)
+                        # collison precion eg. moving them outside of each other
                         
+                        collision_unit_vector = delta_position * (1 / magnitude(delta_position))
+                        overlap = (min_radius - magnitude(delta_position))
+                        collision_vector = overlap * collision_unit_vector
+                        self.position = np.add(self.position, collision_vector)
+                        #ball_list[k].position = np.add(self.position, -collision_vector)
 
 
                         #self.velocity = np.add((f(a, b) * self.velocity), (g(a, b) * ball_list[k].velocity))
+                        #self.velocity = self.velocity * -1
+                        #ball_list[k].velocity = ball_list[k].velocity * -1
+
+                        #self.velocity = 100*collision_vector
+                        print("contacting: ", magnitude(delta_position) <= min_radius)
+                        print(collision_vector, self.number)
+                        #ball_list[k].velocity = -collision_vector
+                        
                         #ball_list[k].velocity = np.add((f(b, a) * ball_list[k].velocity), (g(b, a) * self.velocity))
-                        self.velocity = self.velocity * -1
-                        ball_list[k].velocity = ball_list[k].velocity * -1
+                        #self.velocity = self.velocity * -1
+                        #ball_list[k].velocity = ball_list[k].velocity * -1
                         self.velocity = np.array((0, 0))
                         ball_list[k].velocity = np.array((0, 0))
 
@@ -131,14 +139,19 @@ def main():
     pygame.display.set_caption('kinematic simulation')
 
     # instantiating balls in a range with random red colour
-    pos = [300, 390]
-    vel = [10, -10]
+    pos = [300, 590]
+    pos2 = [300, 300]
+    vel = [40, -40]
     for i in range(0,BALL_AMOUNT):
-        BALL_LIST[i] = (Ball(i, np.array([pos[i], 300]), np.array([vel[i], 0]), np.array([0, 0]), 25, (random.randint(0,255),0,0)))
+        BALL_LIST[i] = (Ball(i, np.array([pos[i], pos2[i]]), np.array([vel[i], 0]), np.array([0, 0]), 25, (random.randint(0,255),0,0)))
 
     # main loop
     running = True
+    run = False
     while running:
+
+        tick = False
+
 
         # quit on escape
         for event in pygame.event.get():
@@ -149,24 +162,38 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
+            
+                elif event.key == pygame.K_SPACE:
+                    tick = True
+
+                elif event.key == pygame.K_r:
+                    run = True
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_f]:
+            tick = True
 
         # main clock for the simulation
-        clock.tick(5)
+        if run == True:
+            clock.tick(60)
 
         # fill screen (deleting old instances of objects)
         screen.fill((255,255,255))
-
+        
+        
         # update loop
         for i in range(0,BALL_AMOUNT):
             
             # drawing circles
             pygame.gfxdraw.filled_circle(screen, round(BALL_LIST[i].position[0]), round(BALL_LIST[i].position[1]), BALL_LIST[i].radius, BALL_LIST[i].colour)
             
-            # updating the different variables
-            BALL_LIST[i].update_collision(BALL_LIST[i].number, BALL_LIST)
-            BALL_LIST[i].update_position()
-            BALL_LIST[i].update_velocity()
-            
+            if tick == True or run == True:
+
+                # updating the different variables
+                BALL_LIST[i].update_collision(BALL_LIST[i].number, BALL_LIST)
+                BALL_LIST[i].update_position()
+                BALL_LIST[i].update_velocity()
+                
         
         pygame.display.update()
 
