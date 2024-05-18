@@ -85,14 +85,16 @@ class Ball():
                         delta_position2 = np.add(ball_list[k].position, - self.position)
                         collision_a = overlap * (delta_position2 * 1/magnitude(delta_position2))
                         collision_b = overlap * (delta_position * 1/magnitude(delta_position))
-                        self.position = np.add(self.position, 1.1*collision_a)
-                        ball_list[k].position = np.add(ball_list[k].position, 1.1*collision_b)
+                        self.position = np.add(self.position, collision_a)
+                        ball_list[k].position = np.add(ball_list[k].position, collision_b)
                         print(collision_a, collision_b)
                         
 
 
-                        self.velocity = np.add((f(a, b) * self.velocity), (g(a, b) * ball_list[k].velocity))
-                        ball_list[k].velocity = np.add((f(b, a) * ball_list[k].velocity), (g(b, a) * self.velocity))
+                        #self.velocity = np.add((f(a, b) * self.velocity), (g(a, b) * ball_list[k].velocity))
+                        #ball_list[k].velocity = np.add((f(b, a) * ball_list[k].velocity), (g(b, a) * self.velocity))
+                        self.velocity = self.velocity * -1
+                        ball_list[k].velocity = ball_list[k].velocity * -1
                         self.velocity = np.array((0, 0))
                         ball_list[k].velocity = np.array((0, 0))
 
