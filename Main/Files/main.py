@@ -73,8 +73,10 @@ class Ball():
                     # would have to redo because now it uses this fact to calculate for both
                     delta_position = np.add(self.position, - ball_list[k].position)
                     min_radius = self.radius + ball_list[k].radius
+                    if self.number == 0:
+                        print(f"difference in position: {delta_position}")
 
-                    if magnitude(delta_position) <= min_radius:
+                    if magnitude(delta_position) < min_radius:
                         
                         a = self.mass
                         b = ball_list[k].mass
@@ -85,26 +87,27 @@ class Ball():
                         # collison precion eg. moving them outside of each other
                         
                         collision_unit_vector = delta_position * (1 / magnitude(delta_position))
-                        overlap = (min_radius - magnitude(delta_position))
+                        overlap = (min_radius - magnitude(delta_position)) / 2
                         collision_vector = overlap * collision_unit_vector
                         self.position = np.add(self.position, collision_vector)
-                        #ball_list[k].position = np.add(self.position, -collision_vector)
+                        ball_list[k].position = np.add(ball_list[k].position, -collision_vector)
 
 
                         #self.velocity = np.add((f(a, b) * self.velocity), (g(a, b) * ball_list[k].velocity))
                         #self.velocity = self.velocity * -1
                         #ball_list[k].velocity = ball_list[k].velocity * -1
 
-                        #self.velocity = 100*collision_vector
-                        print("contacting: ", magnitude(delta_position) <= min_radius)
-                        print(collision_vector, self.number)
-                        #ball_list[k].velocity = -collision_vector
+                        self.velocity = 40 * collision_vector
+
+                        print("collided: ", magnitude(delta_position) < min_radius)
+                        print(f"collision vector {collision_vector} of ball {self.number}")
+                        ball_list[k].velocity = 40 * -collision_vector
                         
                         #ball_list[k].velocity = np.add((f(b, a) * ball_list[k].velocity), (g(b, a) * self.velocity))
                         #self.velocity = self.velocity * -1
                         #ball_list[k].velocity = ball_list[k].velocity * -1
-                        self.velocity = np.array((0, 0))
-                        ball_list[k].velocity = np.array((0, 0))
+                        #self.velocity = np.array((0, 0))
+                        #ball_list[k].velocity = np.array((0, 0))
 
                         """unit_vector = 1/(magnitude(delta_position)) * delta_position
 
@@ -140,10 +143,11 @@ def main():
 
     # instantiating balls in a range with random red colour
     pos = [300, 590]
-    pos2 = [300, 300]
+    pos2 = [300, 315]
     vel = [40, -40]
+    colours = [0, 255]
     for i in range(0,BALL_AMOUNT):
-        BALL_LIST[i] = (Ball(i, np.array([pos[i], pos2[i]]), np.array([vel[i], 0]), np.array([0, 0]), 25, (random.randint(0,255),0,0)))
+        BALL_LIST[i] = (Ball(i, np.array([pos[i], pos2[i]]), np.array([vel[i], 0]), np.array([0, 10]), 25, (colours[i],0,0)))
 
     # main loop
     running = True
