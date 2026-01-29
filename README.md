@@ -1,2 +1,2 @@
-# Ball-Simulation
+# ball-simulation
 kinematic ball sim
